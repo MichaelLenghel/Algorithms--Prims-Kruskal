@@ -96,7 +96,7 @@ class Heap
 
     public boolean isElementHeap(int u)
     {
-        for (int i = 0;i < h.length ;i++ ) 
+        for (int i = 1;i < h.length ;i++ ) 
         {
             if (h[i] == u) 
             {
@@ -279,7 +279,9 @@ class Graph {
             //Indicates that it's null or not in the heap
             hPos[e] = parent[e] = 0;
             dist[e] = Integer.MAX_VALUE;
+            
         }
+
 
         //Sets the bottom element as 0, which acts as a nice buffer to stop it from going in an infite loop in siftUp()
         dist[0] = 0;
@@ -291,58 +293,35 @@ class Graph {
         for (int count = 0; count < V - 1; count++) 
         {
             u = pq.remove();//Add v to mst
-            dist[u] -= dist[u]; // Set distance to 0, marks as in the MST
-
+            //dist[u] = -dist[u];
             for (t = adj[u]; t != z; t = t.next) 
             {
-                if (adj[u].wgt < dist[u]) 
+                if (t.wgt < dist[u]) 
                 {
                     //Assign the weight from one vertex to a vertex near it
-                    dist[u] = adj[u].wgt;
+                    dist[u] = t.wgt;
                     //Add to the minimum spanning tree
-                    parent[u] = adj[u].vert;//adj[u].vert = v (where v is the destination)
-                    wgt_sum += adj[u].wgt;
+                    parent[u] = t.vert;//adj[u].vert = v (where v is the destination)
+                    wgt_sum += t.wgt;
                     //If the graph connects to a new point, add it
-                    if (pq.isElementHeap(u)) 
+                    //->>>Check i f t.vert (the destination is the new element)
+                    if (!pq.isElementHeap(t.vert)) 
                     {
-                        pq.insert(u);      
+                        System.out.println("t.vert = being inserted is: " + t.vert);
+                        pq.insert(t.vert);      
                     }
                     else
                     {
                         //Note: hPos stores the position on the heap
-                        pq.siftUp(pq.hPos[u]);
+                        pq.siftUp(pq.hPos[t.vert]);
                     } 
                 }
             }//end inner for
         }//end outer for
         System.out.print("\n\nWeight of MST = " + wgt_sum + "\n");
         
-        //mst = parent;                            
+        mst = parent;                            
     }
-
-    // public int wgt(int u, int v)
-    // {
-    //     int wgtFound = 0;
-    //     for (Node t = adj[u]; t != z; t = t.next) 
-    //     {
-    //         if (t.vert == v) 
-    //         {
-    //             wgtFound = 1;
-    //             break;
-    //         }
-    //     }
-
-    //     if (wgtFound == 1) 
-    //     {
-    //         //Will be the correct weight as t.vert points to the correct destination
-    //         return adj[u].wgt;
-    //     }
-    //     else
-    //     {
-    //         //Weight not found, so return maximum value to put an empty element in the array to signify that
-    //         return  Integer.MAX_VALUE;
-    //     }
-    // }
     
     public void showMST()
     {
@@ -366,6 +345,8 @@ public class PrimLists
         g.display();
                
         g.MST_Prim(2);
+        
+        g.showMST();
     }
     
     
