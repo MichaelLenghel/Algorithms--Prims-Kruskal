@@ -270,33 +270,42 @@ class Graph {
         int[] dist, parent, hPos;
         Node t;
 
-        dist = new int[E + 1];
-        parent = new int[E + 1];
+        dist = new int[V + 1];
+        parent = new int[V + 1];
         hPos = new int[getMaxValue()];
+        for (int i = 0;i < getMaxValue() ;i++ ) 
+        {
+            hPos[i] = 0;
+        }
         //Initialise arrays
-        for (e = 0; e < E + 1;e++ ) 
+        for (v = 0; v < V + 1;v++ ) 
         {
             //Indicates that it's null or not in the heap
-            hPos[e] = parent[e] = 0;
-            dist[e] = Integer.MAX_VALUE;
+            hPos[v] = parent[v] = 0;
+            dist[v] = Integer.MAX_VALUE;
             
         }
 
 
         //Sets the bottom element as 0, which acts as a nice buffer to stop it from going in an infite loop in siftUp()
         dist[0] = 0;
+        parent[s] = 0;
         
         Heap pq =  new Heap(V, dist, hPos);
 
+        /**1: Try using different loops - > Using while
+           2: Instead of dist[u], try dist[t.vert] on lines
+            3: Remember to uncomment dist[u] = -dist[u]*/
+
         pq.insert(s);//s is the root of the mst
-        
-        for (int count = 0; count < V - 1; count++) 
+        while(!(pq.isEmpty()))
         {
             u = pq.remove();//Add v to mst
             //dist[u] = -dist[u];
             for (t = adj[u]; t != z; t = t.next) 
+            //while(u != z) t = t.next // The t = t.next is at the end of the loop, try with a while loop
             {
-                if (t.wgt < dist[u]) 
+                if (t.wgt < dist[u])//dist[u] was original
                 {
                     //Assign the weight from one vertex to a vertex near it
                     dist[u] = t.wgt;
@@ -313,7 +322,7 @@ class Graph {
                     else
                     {
                         //Note: hPos stores the position on the heap
-                        pq.siftUp(pq.hPos[t.vert]);
+                        pq.siftUp(hPos[t.vert]);
                     } 
                 }
             }//end inner for
