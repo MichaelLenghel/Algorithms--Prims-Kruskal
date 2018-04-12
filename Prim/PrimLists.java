@@ -19,6 +19,7 @@ class Heap
     {
         N = 0;
         h = new int[maxSize + 1];
+        //Point to the arrays
         dist = _dist;
         hPos = _hPos;
     }
@@ -191,7 +192,6 @@ class Graph {
 
         while(curr != z)
         {
-            System.out.println("Just entered");
             prev = curr;
             curr = curr.next;
         }
@@ -272,11 +272,8 @@ class Graph {
 
         dist = new int[V + 1];
         parent = new int[V + 1];
-        hPos = new int[getMaxValue()];
-        for (int i = 0;i < getMaxValue() ;i++ ) 
-        {
-            hPos[i] = 0;
-        }
+        hPos = new int[V + 1];
+
         //Initialise arrays
         for (v = 0; v < V + 1;v++ ) 
         {
@@ -286,7 +283,7 @@ class Graph {
             
         }
 
-
+        //dist[s] = 0;
         //Sets the bottom element as 0, which acts as a nice buffer to stop it from going in an infite loop in siftUp()
         dist[0] = 0;
         parent[s] = 0;
@@ -295,29 +292,32 @@ class Graph {
 
         /**1: Try using different loops - > Using while
            2: Instead of dist[u], try dist[t.vert] on lines
-            3: Remember to uncomment dist[u] = -dist[u]*/
+           3: Remember to uncomment dist[u] = -dist[u]*/
 
         pq.insert(s);//s is the root of the mst
         while(!(pq.isEmpty()))
         {
             u = pq.remove();//Add v to mst
-            //dist[u] = -dist[u];
-            for (t = adj[u]; t != z; t = t.next) 
-            //while(u != z) t = t.next // The t = t.next is at the end of the loop, try with a while loop
+            dist[u] = -dist[u];
+            t = adj[u];
+            //for (t = adj[u]; t != z; t = t.next) //(Just another method of iterating)
+            while(t != z)
             {
-                if (t.wgt < dist[u])//dist[u] was original
+                if (t.wgt < dist[t.vert])//dist[u] was original
                 {
                     //Assign the weight from one vertex to a vertex near it
-                    dist[u] = t.wgt;
+                    dist[t.vert] = t.wgt;
                     //Add to the minimum spanning tree
-                    parent[u] = t.vert;//adj[u].vert = v (where v is the destination)
-                    wgt_sum += t.wgt;
+                    parent[t.vert] = u;//adj[u].vert = v (where v is the destination)
+                    //System.out.println("Adding: " + t.wgt);
+                    
                     //If the graph connects to a new point, add it
                     //->>>Check i f t.vert (the destination is the new element)
                     if (!pq.isElementHeap(t.vert)) 
                     {
-                        System.out.println("t.vert = being inserted is: " + t.vert);
-                        pq.insert(t.vert);      
+                        //System.out.println("t.vert = being inserted is: " +  toChar(t.vert));
+                        pq.insert(t.vert);  
+                        wgt_sum += t.wgt;
                     }
                     else
                     {
@@ -325,8 +325,10 @@ class Graph {
                         pq.siftUp(hPos[t.vert]);
                     } 
                 }
-            }//end inner for
-        }//end outer for
+                t = t.next;
+            }//end inner while
+        }//end outer while
+
         System.out.print("\n\nWeight of MST = " + wgt_sum + "\n");
         
         mst = parent;                            
@@ -336,8 +338,14 @@ class Graph {
     {
             System.out.print("\n\nMinimum Spanning tree parent array is:\n");
             for(int v = 1; v <= V; ++v)
-                System.out.println(toChar(v) + " -> " + toChar(mst[v]));
-            System.out.println("");
+            {
+                if (toChar(mst[v]) > 64 && toChar(mst[v]) < 91) 
+                {
+                    System.out.println(toChar(v) + " -> " + toChar(mst[v]));  
+                }
+            }
+            System.out.println(""); 
+
     }
 
 }//end class Graph
@@ -346,14 +354,14 @@ public class PrimLists
 {
     public static void main(String[] args) throws IOException
     {
-        int s = 2;
+        int s = 1;
         String fname = "wGraph3.txt";               
 
         Graph g = new Graph(fname);
        
         g.display();
                
-        g.MST_Prim(2);
+        g.MST_Prim(s);
         
         g.showMST();
     }
