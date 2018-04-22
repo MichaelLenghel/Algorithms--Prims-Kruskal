@@ -1,12 +1,17 @@
 // Kruskal's Minimum Spanning Tree Algorithm
 // Union-find implemented using disjoint set trees without compression
 
+/**Name: Michael Lenghel
+   Student Number: c16434974
+    */
+
 import java.io.*;    
  
 class Edge 
 {
     public int u, v, wgt;
 
+    //Constructor to initialise edge components to zero
     public Edge() 
     {
         u = 0;
@@ -331,18 +336,8 @@ class Graph
 
         // priority queue for indices of array of edges
         Heap h = new Heap(E, edge);
+
         h.display();
-
-        //Test code to make sure that the heap returns the minimum values
-
-        //System.out.println("\n" + "Displaying the elements in order from smallest weight: ");
-        // while(!h.isEmpty())
-        // {
-        //     e = h.remove();
-        //     //h.display(); //(displays heap as each element is removed)
-        //     e.show();
-        // }
-
 
         //create partition of singleton sets for the vertices 
         UnionFindSets partition = new UnionFindSets(V);
@@ -385,16 +380,13 @@ class Graph
         }
         System.out.println();
     }
-
 } // end of Graph class
     
     // test code
 class KruskalTrees {
     public static void main(String[] args) throws IOException
     {
-        String fname = "wGraph3.txt";
-        //System.out.print("\nInput name of file with graph definition: ");
-        //fname = Console.ReadLine();
+        String fname = "myGraph.txt";
 
         Graph g = new Graph(fname);
 

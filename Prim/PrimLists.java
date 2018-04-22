@@ -1,7 +1,12 @@
 // Simple weighted graph representation 
 // Uses an Adjacency Linked Lists, suitable for sparse graphs
 
+/**Name: Michael Lenghel
+   Student Number: c16434974
+	*/
+
 import java.io.*;
+import java.util.Scanner;
 
 class Heap
 {
@@ -22,6 +27,7 @@ class Heap
         //Point to the arrays
         dist = _dist;
         hPos = _hPos;
+        dist[0] = 0;
     }
 
 
@@ -35,7 +41,6 @@ class Heap
     {
         int v = h[k];
         h[0] = 0;
-
         // k / 2 is 0 on first iteration
         //While infinity < 0
         while( dist[v] < dist[h[k / 2]]) 
@@ -57,9 +62,7 @@ class Heap
         //Assign element we will be shifting top v
         v = h[k];
 
-        //dist[v] = Integer.MAX_VALUE;
-        //While node at pos k, has a left child node
-        while(dist[v] > dist[h[k * 2]] && N >= (k * 2))
+        while(dist[v] > dist[h[k * 2]])
         {
             h[k] = h[k * 2];
             hPos[h[k]] = k;
@@ -94,19 +97,6 @@ class Heap
         
         return v;
     }
-
-    public boolean isElementHeap(int u)
-    {
-        for (int i = 1;i < h.length ;i++ ) 
-        {
-            if (h[i] == u) 
-            {
-                  return true;
-            }  
-        }
-        return false;
-    }
-
 }
 
 class Graph {
@@ -124,7 +114,6 @@ class Graph {
     private int V, E;
     private Node[] adj;
     private Node z;
-    Node head, tail;
     private int[] mst;
     
     // used for traversing graph
@@ -135,9 +124,9 @@ class Graph {
     // default constructor
     public Graph(String graphFile)  throws IOException
     {
-        head = tail = z;
-        int u, v, lastV = -1;
+        int u, v;
         int e, wgt;
+        Node node, temp;
 
         FileReader fr = new FileReader(graphFile);
         BufferedReader reader = new BufferedReader(fr);
@@ -173,43 +162,20 @@ class Graph {
             System.out.println("Edge " + toChar(u) + "--(" + wgt + ")--" + toChar(v));    
             System.out.println("");
 
-            //Has to be adj[u] as we are mapping from First column to second
-            addEdge(u, v, wgt);
+            //Create the adj list here. Since using prims, we set for both origin and destination to the array
+            temp = adj[u];
+            adj[u] = new Node();
+            adj[u].vert = v;
+            adj[u].wgt = wgt;
+            adj[u].next = temp;
+
+            temp = adj[v];
+            adj[v] = new Node();
+            adj[v].vert = u;
+            adj[v].wgt = wgt;
+            adj[v].next = temp;
         } 
     }
-
-    public void addEdge(int u, int v, int wgt)
-    {
-        Node curr, prev, t;
-        t = new Node();
-        //Initialise t with data
-        t.vert = v;
-        t.wgt = wgt;
-        t.next = z;
-
-        prev = z;
-        curr = adj[u];
-
-        while(curr != z)
-        {
-            prev = curr;
-            curr = curr.next;
-        }
-
-        //If prev is null, then the list is empty
-        if (prev == z) 
-        {
-            adj[u] = t;
-            //t.next = curr;
-        }
-
-        //List is not empty
-        else
-        {
-            prev.next = t;
-            t.next = curr;
-        }
-    } 
    
     // convert vertex into char for pretty printing
     private char toChar(int u)
@@ -230,112 +196,66 @@ class Graph {
         System.out.println("");
     }
 
-    public int getMaxValue()
-    {
-        int max = Integer.MIN_VALUE;
-
-        for(int v=1; v<V; ++v)
-        {
-            for(Node n = adj[v]; n != z; n = n.next)
-            {
-                if (adj[v].vert > max) 
-                {
-                    max = adj[v].vert;
-                }
-            }
-        }
-        //Need it to be able to hold no. of edges at minimum
-        if (max < E) 
-        {
-            return E + 1;
-        }
-        else
-        {
-            return max;
-        }
-        
-    }
-
-
-    
-   /** Prequesites b4 calling this:
-    dist[h[k]] references a distance from u to v*/
     
     public void MST_Prim(int s)
     {
-        int v, u;
-        int wgt, e, wgt_sum = 0;
+        int v;
+        int wgt_sum = 0;
         /**Parent stores the parent vertex of u in MST and is MST, dist stores dist of a vertex u to some nearest vertex*/
-        //
         int[] dist, parent, hPos;
-        Node t;
 
+        /**Java initialises all arrays to 0 on its own*/
         dist = new int[V + 1];
         parent = new int[V + 1];
         hPos = new int[V + 1];
 
-        //Initialise arrays
-        for (v = 0; v < V + 1;v++ ) 
-        {
-            //Indicates that it's null or not in the heap
-            hPos[v] = parent[v] = 0;
-            dist[v] = Integer.MAX_VALUE;
-            
-        }
+        //Initialise dist
+        for (int i = 1; i < V + 1;i++ ) 
+            dist[i] = Integer.MAX_VALUE;
 
-        //dist[s] = 0;
-        //Sets the bottom element as 0, which acts as a nice buffer to stop it from going in an infite loop in siftUp()
-        dist[0] = 0;
+        //Sets the starting element to 0, which acts as a nice buffer to stop it from going in an infite loo
+        dist[s] = 0;
         parent[s] = 0;
         
         Heap pq =  new Heap(V, dist, hPos);
-
-        /**1: Try using different loops - > Using while
-           2: Instead of dist[u], try dist[t.vert] on lines
-           3: Remember to uncomment dist[u] = -dist[u]*/
-
         pq.insert(s);//s is the root of the mst
-        while(!(pq.isEmpty()))
+
+        while(! ( pq.isEmpty() ) )
         {
-            u = pq.remove();//Add v to mst
-            dist[u] = -dist[u];
-            t = adj[u];
+            v = pq.remove();
+            dist[v] = -dist[v];
+            Node t = adj[v];
             //for (t = adj[u]; t != z; t = t.next) //(Just another method of iterating)
             while(t != z)
             {
-                if (t.wgt < dist[t.vert])//dist[u] was original
+                if (t.wgt < dist[t.vert])//dist[t] was original
                 {
-                    //Assign the weight from one vertex to a vertex near it
                     dist[t.vert] = t.wgt;
-                    //Add to the minimum spanning tree
-                    parent[t.vert] = u;//adj[u].vert = v (where v is the destination)
-                    //System.out.println("Adding: " + t.wgt);
+                    parent[t.vert] = v;//Adds to min span tree
                     
-                    //If the graph connects to a new point, add it
-                    //->>>Check i f t.vert (the destination is the new element)
-                    if (!pq.isElementHeap(t.vert)) 
-                    {
-                        //System.out.println("t.vert = being inserted is: " +  toChar(t.vert));
+                    //If the graph connects to a new point, add it. Otherwise sift it up to find order
+                    if (hPos[t.vert] == 0) 
                         pq.insert(t.vert);  
-                        wgt_sum += t.wgt;
-                    }
                     else
-                    {
-                        //Note: hPos stores the position on the heap
                         pq.siftUp(hPos[t.vert]);
-                    } 
                 }
                 t = t.next;
             }//end inner while
         }//end outer while
 
+        for (int d: dist) 
+            wgt_sum += Math.abs(d);
+
         System.out.print("\n\nWeight of MST = " + wgt_sum + "\n");
         
-        mst = parent;                            
+        mst = parent;   
+
+        showMST(s);                         
     }
     
-    public void showMST()
+    public void showMST(int s)
     {
+            System.out.println("Starting vertex is: " + toChar(s));
             System.out.print("\n\nMinimum Spanning tree parent array is:\n");
             for(int v = 1; v <= V; ++v)
             {
@@ -345,7 +265,6 @@ class Graph {
                 }
             }
             System.out.println(""); 
-
     }
 
 }//end class Graph
@@ -354,16 +273,18 @@ public class PrimLists
 {
     public static void main(String[] args) throws IOException
     {
-        int s = 1;
-        String fname = "wGraph3.txt";               
+        Scanner sc = new Scanner(System.in);  
+        System.out.println("Please enter the name of the graph"); 
+        String  fname = sc.next();//e.g.wGraph3.txt  
+        
+        System.out.println("Please enter the starting vertex of the graph"); 
+        int startVertex = sc.nextInt();  
 
         Graph g = new Graph(fname);
        
         g.display();
                
-        g.MST_Prim(s);
-        
-        g.showMST();
+        g.MST_Prim(startVertex);
     }
     
     
